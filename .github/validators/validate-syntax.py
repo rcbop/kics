@@ -28,6 +28,7 @@ print(f'found {len(files)} files to check')
 ##############################
 #         run linter         #
 ##############################
+result = ''
 for file in files:
   try:
     cmds = [LINTER_PATH, file]
@@ -41,9 +42,10 @@ for file in files:
     result = subprocess.check_output(cmds, shell=False).decode('utf-8').rstrip()
   except CalledProcessError as e:
     error_files.append(e)
-  for line in result.split('\n'):
-    if line:
-      print(f"{line}")
+  if result:
+    for line in result.split('\n'):
+      if line:
+        print(f"{line}")
 
 ################################
 # show errors and exit code 1  #
@@ -51,8 +53,11 @@ for file in files:
 if len(error_files) > 0:
   print("\n--- errors ---")
   for error in error_files:
-    print(error)
+    print('ERR', error)
     error_result = error.output.decode('utf-8').rstrip()
-    for line in error_result.split('\n'):
-      print(line)
+    err_lines = error_result.split('\n')
+    if len(err_lines) > 1:
+      for line in err_lines:
+        print('\t'+line.rstrip())
+  print('--- end ---')
   exit(1)
